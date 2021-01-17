@@ -11,6 +11,8 @@ pygame.display.set_caption("Caroline Wanjiku")
 
 clock = pygame.time.Clock()
 
+score = 0
+
 # loading the splites
 walkRight = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png'), pygame.image.load('R5.png'), pygame.image.load('R6.png'), pygame.image.load('R7.png'), pygame.image.load('R8.png'), pygame.image.load('R9.png')]
 walkLeft = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.image.load('L3.png'), pygame.image.load('L4.png'), pygame.image.load('L5.png'), pygame.image.load('L6.png'), pygame.image.load('L7.png'), pygame.image.load('L8.png'), pygame.image.load('L9.png')]
@@ -50,7 +52,7 @@ class player(object):
             else:
                 win.blit(walkLeft[0], (self.x, self.y))
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
+        #pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
 
 class projectile(object):
     def __init__(self, x, y, radius, color, facing):
@@ -79,20 +81,25 @@ class enemy(object):
         self.walkcount = 0
         self.vel = 3
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
+        self.health = 10
+        self.visible = True
 
     def draw(self, win):
         self.move()
-        if self.walkcount + 1 >= 33:
-            self.walkcount = 0
+        if self.visible:
+            if self.walkcount + 1 >= 33:
+                self.walkcount = 0
 
-        if self.vel > 0:
-            win.blit(self.walkRight[self.walkcount//3], (self.x, self.y))
-            self.walkcount += 1
-        else:
-            win.blit(self.walkLeft[self.walkcount//3], (self.x, self.y))
-            self.walkcount += 1
+            if self.vel > 0:
+                win.blit(self.walkRight[self.walkcount//3], (self.x, self.y))
+                self.walkcount += 1
+            else:
+                win.blit(self.walkLeft[self.walkcount//3], (self.x, self.y))
+                self.walkcount += 1
+            pygame.draw.rect(win, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
+            pygame.draw.rect(win, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - ((5) * (10 - self.health)), 10))
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
+        #pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
 
     def move(self):
         if self.vel > 0:
@@ -109,11 +116,17 @@ class enemy(object):
                 self.walkcount = 0
 
     def hit(self):
+        if self.health > 0:
+            self.health -= 1
+        else:
+            self.visible = False
         print("hit!")
 
 def gamewindow():
     #filling to avoid streaching
     win.blit(bg, (0,0))
+    text = font.render('Score: ' + str(score), 1, (0,0,0))
+    win.blit(text, (390, 10))
     carol.draw(win)
     charlie.draw(win)
     for bullet in bullets:
@@ -121,6 +134,7 @@ def gamewindow():
     pygame.display.update()
 
 #game play
+font = pygame.font.SysFont("Comicsans", 30, True, True)
 carol = player(300, 410, 64, 64)
 charlie = enemy(100, 410, 64, 64, 450)
 shootloop = 0
@@ -141,6 +155,7 @@ while run:
         if bullet.y - bullet.radius < charlie.hitbox[1] + charlie.hitbox[3] and bullet.y + bullet.radius > charlie.hitbox[1]:
             if bullet.x + bullet.radius > charlie.hitbox[0] and bullet.x - bullet.radius < charlie.hitbox[0] + charlie.hitbox[2]:
                 charlie.hit()
+                score += 1
                 bullets.pop(bullets.index(bullet))
 
         if bullet.x < 500 and bullet.x > 0:
