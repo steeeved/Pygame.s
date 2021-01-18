@@ -1,6 +1,8 @@
 #OBJECT ORIENTED APPROACH
 #Collisions
 import pygame
+import os
+
 
 pygame.init()
 
@@ -10,6 +12,11 @@ win = pygame.display.set_mode((500, 480))
 pygame.display.set_caption("Caroline Wanjiku")
 
 clock = pygame.time.Clock()
+bullet_sound = pygame.mixer.Sound('Assets/bullet.wav')
+hit_sound = pygame.mixer.Sound('Assets/hit.wav')
+
+music = pygame.mixer.music.load('Assets/music.mp3')
+pygame.mixer.music.play(-1)
 
 score = 0
 
@@ -53,6 +60,23 @@ class player(object):
                 win.blit(walkLeft[0], (self.x, self.y))
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
         #pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
+    def hit(self):
+        self.x = 60
+        self.y = 410
+        walkcount = 0
+        font1 = pygame.font.SysFont("Comicsans", 100, True, True)
+        text = font1.render('-5', 1, (255, 0, 0))
+        win.blit(text, (250 - (text.get_width()/2), 200))
+        pygame.display.update()
+        i =  0
+        while i < 300:
+            pygame.time.delay(10)
+            i += 1
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    i = 301
+                    pygame.quit()
+    
 
 class projectile(object):
     def __init__(self, x, y, radius, color, facing):
@@ -142,6 +166,12 @@ bullets = []
 run = True
 while run:
     clock.tick(27)
+
+    if carol.hitbox[1] < charlie.hitbox[1] + charlie.hitbox[3] and carol.hitbox[1]+ carol.hitbox[3] > charlie.hitbox[1]:
+        if carol.hitbox[0] + carol.hitbox[2] > charlie.hitbox[0] and carol.hitbox[0] < charlie.hitbox[0] + charlie.hitbox[2]:
+            carol.hit()
+            score -= 5
+        
     #checking for events that occur during the game
     if shootloop > 0:
         shootloop += 1
@@ -155,6 +185,7 @@ while run:
         if bullet.y - bullet.radius < charlie.hitbox[1] + charlie.hitbox[3] and bullet.y + bullet.radius > charlie.hitbox[1]:
             if bullet.x + bullet.radius > charlie.hitbox[0] and bullet.x - bullet.radius < charlie.hitbox[0] + charlie.hitbox[2]:
                 charlie.hit()
+                hit_sound.play()
                 score += 1
                 bullets.pop(bullets.index(bullet))
 
@@ -165,6 +196,7 @@ while run:
     #checking what keys have been pressed 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_SPACE] and shootloop == 0:
+        bullet_sound.play()
         if carol.left:
             facing = -1
         else: 
