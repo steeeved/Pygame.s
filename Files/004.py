@@ -61,9 +61,11 @@ class player(object):
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
         #pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
     def hit(self):
+        self.is_jump = False
+        self.jumpcount = 10
         self.x = 60
         self.y = 410
-        walkcount = 0
+        self.walkcount = 0
         font1 = pygame.font.SysFont("Comicsans", 100, True, True)
         text = font1.render('-5', 1, (255, 0, 0))
         win.blit(text, (250 - (text.get_width()/2), 200))
@@ -150,7 +152,7 @@ def gamewindow():
     #filling to avoid streaching
     win.blit(bg, (0,0))
     text = font.render('Score: ' + str(score), 1, (0,0,0))
-    win.blit(text, (390, 10))
+    win.blit(text, (350, 10))
     carol.draw(win)
     charlie.draw(win)
     for bullet in bullets:
@@ -166,11 +168,12 @@ bullets = []
 run = True
 while run:
     clock.tick(27)
-
-    if carol.hitbox[1] < charlie.hitbox[1] + charlie.hitbox[3] and carol.hitbox[1]+ carol.hitbox[3] > charlie.hitbox[1]:
-        if carol.hitbox[0] + carol.hitbox[2] > charlie.hitbox[0] and carol.hitbox[0] < charlie.hitbox[0] + charlie.hitbox[2]:
-            carol.hit()
-            score -= 5
+    
+    if charlie.visible == True:
+        if carol.hitbox[1] < charlie.hitbox[1] + charlie.hitbox[3] and carol.hitbox[1]+ carol.hitbox[3] > charlie.hitbox[1]:
+            if carol.hitbox[0] + carol.hitbox[2] > charlie.hitbox[0] and carol.hitbox[0] < charlie.hitbox[0] + charlie.hitbox[2]:
+                carol.hit()
+                score -= 5
         
     #checking for events that occur during the game
     if shootloop > 0:
